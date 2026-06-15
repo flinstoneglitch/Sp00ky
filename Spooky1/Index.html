@@ -5,1088 +5,311 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>sp00ky — quantum messenger</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500&display=swap');
-
-  :root {
-    --black: #050508;
-    --deep: #0a0a12;
-    --surface: #0f0f1a;
-    --border: #1a1a2e;
-    --cyan: #7fdcff;
-    --cyan-dim: #3a8fa8;
-    --ghost: rgba(127,220,255,0.08);
-    --ghost-mid: rgba(127,220,255,0.15);
-    --white: #e8eaf0;
-    --muted: #5a5a7a;
-    --danger: #ff4d6d;
-    --green: #39ff85;
-    --pink: #ff2d9b;
-    --pink-dim: rgba(255,45,155,0.15);
-    --pink-glow: rgba(255,45,155,0.35);
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--black);
-    color: var(--white);
-    font-family: 'Inter', sans-serif;
-    font-weight: 300;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Quantum field background */
-  #qfield {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-  }
-
-  .app {
-    position: relative;
-    z-index: 1;
-    max-width: 480px;
-    margin: 0 auto;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* ── SCREENS ── */
-  .screen { display: none; flex-direction: column; flex: 1; }
-  .screen.active { display: flex; }
-
-  /* ── LANDING ── */
-  #screen-land {
-    align-items: center;
-    justify-content: center;
-    padding: 40px 24px;
-    text-align: center;
-    gap: 0;
-  }
-
-  .logo-wrap {
-    margin-bottom: 32px;
-    position: relative;
-  }
-
-  .logo {
-    font-family: 'Space Mono', monospace;
-    font-size: clamp(48px, 12vw, 72px);
-    font-weight: 700;
-    letter-spacing: -2px;
-    color: var(--white);
-    line-height: 1;
-  }
-
-  .logo .zeros {
-    color: var(--pink);
-    text-shadow: 0 0 20px var(--pink), 0 0 60px var(--pink-glow), 0 0 100px var(--pink-dim);
-    position: relative;
-  }
-
-  .logo .zeros::after {
-    content: '⚛';
-    position: absolute;
-    font-size: 10px;
-    top: 8px;
-    right: -14px;
-    color: var(--cyan);
-    opacity: 0.7;
-  }
-
-  .logo-sub {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 4px;
-    color: var(--cyan-dim);
-    margin-top: 10px;
-    text-transform: uppercase;
-  }
-
-  .cat-ghost {
-    font-size: 64px;
-    margin-bottom: 8px;
-    display: block;
-    animation: float 4s ease-in-out infinite;
-    filter: drop-shadow(0 0 16px rgba(127,220,255,0.5));
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-  }
-
-  .tagline {
-    font-size: 14px;
-    color: var(--muted);
-    line-height: 1.7;
-    margin: 24px 0 48px;
-    max-width: 280px;
-  }
-
-  .tagline em {
-    color: var(--cyan);
-    font-style: normal;
-  }
-
-  .btn-primary {
-    background: transparent;
-    border: 1px solid var(--pink);
-    color: var(--pink);
-    font-family: 'Space Mono', monospace;
-    font-size: 13px;
-    padding: 14px 32px;
-    border-radius: 4px;
-    cursor: pointer;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    transition: all 0.2s;
-    width: 100%;
-    max-width: 280px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .btn-primary::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--pink-dim);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-
-  .btn-primary:hover::before { opacity: 1; }
-  .btn-primary:hover { box-shadow: 0 0 20px var(--pink-glow); }
-  .btn-primary:active { transform: scale(0.98); }
-
-  .btn-secondary {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: 'Space Mono', monospace;
-    font-size: 13px;
-    padding: 14px 32px;
-    border-radius: 4px;
-    cursor: pointer;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    transition: all 0.2s;
-    width: 100%;
-    max-width: 280px;
-    margin-top: 12px;
-  }
-
-  .btn-secondary:hover { border-color: var(--muted); color: var(--white); }
-
-  .quantum-badge {
-    margin-top: 48px;
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 1px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .q-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  /* ── SETUP SCREEN ── */
-  #screen-setup {
-    padding: 0;
-  }
-
-  .top-bar {
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .top-bar .logo-sm {
-    font-family: 'Space Mono', monospace;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--white);
-    flex: 1;
-  }
-
-  .top-bar .logo-sm span { color: var(--cyan); text-shadow: 0 0 12px var(--cyan); }
-
-  .back-btn {
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 20px;
-    padding: 4px;
-    transition: color 0.2s;
-  }
-  .back-btn:hover { color: var(--white); }
-
-  .setup-body {
-    padding: 32px 24px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-  }
-
-  .setup-title {
-    font-family: 'Space Mono', monospace;
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 1.3;
-  }
-
-  .setup-title span { color: var(--cyan); }
-
-  .input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .input-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--cyan-dim);
-    text-transform: uppercase;
-  }
-
-  .input-field {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--white);
-    font-family: 'Inter', sans-serif;
-    font-size: 16px;
-    padding: 14px 16px;
-    border-radius: 6px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    width: 100%;
-  }
-
-  .input-field:focus {
-    border-color: var(--cyan-dim);
-    box-shadow: 0 0 0 3px rgba(127,220,255,0.06);
-  }
-
-  .input-field::placeholder { color: var(--muted); }
-
-  .divider {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: var(--muted);
-    font-size: 11px;
-    font-family: 'Space Mono', monospace;
-  }
-
-  .divider::before, .divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  .session-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .session-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--cyan-dim);
-    text-transform: uppercase;
-  }
-
-  .session-code {
-    font-family: 'Space Mono', monospace;
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: 6px;
-    color: var(--pink);
-    text-shadow: 0 0 12px var(--pink-glow);
-    text-align: center;
-    padding: 8px 0;
-  }
-
-  .session-hint {
-    font-size: 12px;
-    color: var(--muted);
-    text-align: center;
-    line-height: 1.5;
-  }
-
-  .copy-btn {
-    background: var(--ghost);
-    border: 1px solid var(--border);
-    color: var(--cyan);
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 1px;
-    padding: 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: center;
-  }
-
-  .copy-btn:hover { background: var(--ghost-mid); }
-
-  .quantum-status {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 12px;
-    color: var(--muted);
-    font-family: 'Space Mono', monospace;
-    padding: 12px 0;
-  }
-
-  /* ── CHAT SCREEN ── */
-  #screen-chat {
-    display: none;
-    flex-direction: column;
-    height: 100vh;
-  }
-
-  #screen-chat.active { display: flex; }
-
-  .chat-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(5,5,8,0.95);
-    backdrop-filter: blur(10px);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-
-  .chat-avatar {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: var(--ghost);
-    border: 1px solid var(--cyan-dim);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-  }
-
-  .chat-peer {
-    flex: 1;
-  }
-
-  .chat-peer-name {
-    font-family: 'Space Mono', monospace;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--white);
-  }
-
-  .chat-peer-status {
-    font-size: 11px;
-    color: var(--green);
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-top: 2px;
-  }
-
-  .chat-peer-status::before {
-    content: '';
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 6px var(--green);
-  }
-
-  .chat-quantum-info {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    color: var(--cyan-dim);
-    letter-spacing: 1px;
-    text-align: right;
-  }
-
-  .messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    scroll-behavior: smooth;
-  }
-
-  .messages::-webkit-scrollbar { width: 2px; }
-  .messages::-webkit-scrollbar-track { background: transparent; }
-  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  .msg {
-    max-width: 78%;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    animation: msgIn 0.3s ease;
-  }
-
-  @keyframes msgIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .msg.sent { align-self: flex-end; align-items: flex-end; }
-  .msg.received { align-self: flex-start; align-items: flex-start; }
-
-  .msg-bubble {
-    padding: 11px 14px;
-    border-radius: 16px;
-    font-size: 14px;
-    line-height: 1.5;
-    position: relative;
-    word-break: break-word;
-  }
-
-  .msg.sent .msg-bubble {
-    background: var(--pink-dim);
-    border: 1px solid var(--pink);
-    color: var(--white);
-    border-bottom-right-radius: 4px;
-    box-shadow: 0 0 12px var(--pink-glow);
-  }
-
-  .msg.received .msg-bubble {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--white);
-    border-bottom-left-radius: 4px;
-  }
-
-  .msg-meta {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    color: var(--muted);
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .msg-vanish {
-    color: var(--danger);
-    font-size: 9px;
-    font-family: 'Space Mono', monospace;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .vanish-timer {
-    color: var(--danger);
-  }
-
-  .unobserved-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 1px;
-    color: var(--cyan);
-    text-transform: uppercase;
-    opacity: 0.9;
-  }
-
-  .observed-label {
-    margin-top: 8px;
-    font-size: 10px;
-    color: var(--pink);
-    font-family: 'Space Mono', monospace;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-
-  /* System message */
-  .msg-system {
-    text-align: center;
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 1px;
-    padding: 8px 16px;
-    background: var(--ghost);
-    border-radius: 20px;
-    align-self: center;
-    border: 1px solid var(--border);
-  }
-
-  /* Input area */
-  .chat-input-area {
-    padding: 12px 16px 24px;
-    border-top: 1px solid var(--border);
-    background: rgba(5,5,8,0.95);
-    backdrop-filter: blur(10px);
-  }
-
-  .input-row {
-    display: flex;
-    gap: 10px;
-    align-items: flex-end;
-  }
-
-  .msg-input {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--white);
-    font-family: 'Inter', sans-serif;
-    font-size: 15px;
-    padding: 12px 16px;
-    border-radius: 24px;
-    outline: none;
-    resize: none;
-    max-height: 120px;
-    transition: border-color 0.2s;
-    line-height: 1.4;
-  }
-
-  .msg-input:focus { border-color: var(--cyan-dim); }
-  .msg-input::placeholder { color: var(--muted); }
-
-  .send-btn {
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    background: var(--pink-dim);
-    border: 1px solid var(--pink);
-    color: var(--pink);
-    font-size: 18px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-
-  .send-btn:hover {
-    background: rgba(255,45,155,0.3);
-    box-shadow: 0 0 16px var(--pink-glow);
-  }
-
-  .send-btn:active { transform: scale(0.92); }
-
-  .vanish-toggle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 1px;
-    cursor: pointer;
-    width: fit-content;
-  }
-
-  .toggle {
-    width: 28px; height: 16px;
-    border-radius: 8px;
-    background: var(--border);
-    position: relative;
-    transition: background 0.2s;
-  }
-
-  .toggle.on { background: var(--pink); box-shadow: 0 0 8px var(--pink-glow); }
-
-  .toggle::after {
-    content: '';
-    position: absolute;
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    background: white;
-    top: 2px; left: 2px;
-    transition: left 0.2s;
-  }
-
-  .toggle.on::after { left: 14px; }
-
-  /* Vanish animation */
-  @keyframes vanish {
-    0% { opacity: 1; filter: blur(0); transform: scale(1); }
-    40% { opacity: 0.9; filter: blur(2px); transform: scale(1.03); }
-    100% { opacity: 0; filter: blur(18px); transform: scale(0.85) translateY(-8px); }
-  }
-
-  .msg.vanishing .msg-bubble {
-    animation: vanish 0.8s ease forwards;
-  }
-
-  /* Loading state */
-  .loading-dots span {
-    animation: blink 1.4s infinite;
-    color: var(--cyan);
-  }
-  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-  @keyframes blink {
-    0%, 80%, 100% { opacity: 0; }
-    40% { opacity: 1; }
-  }
-
-  /* Qubit row */
-  .qubit-row {
-    display: flex;
-    gap: 3px;
-    margin-top: 6px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .qubit {
-    width: 14px; height: 14px;
-    border-radius: 2px;
-    background: var(--ghost);
-    border: 1px solid var(--border);
-    font-family: 'Space Mono', monospace;
-    font-size: 8px;
-    color: var(--cyan-dim);
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.3s;
-  }
-
-  .qubit.active {
-    background: var(--ghost-mid);
-    border-color: var(--cyan-dim);
-    color: var(--cyan);
-    box-shadow: 0 0 4px rgba(127,220,255,0.3);
-  }
-
-  /* Responsive */
-  @media (max-width: 480px) {
-    .app { max-width: 100%; }
-  }
-
-  /* QR Modal */
-  #qr-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    background: rgba(5,5,8,0.92);
-    backdrop-filter: blur(12px);
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 20px;
-    padding: 32px;
-  }
-
-  .qr-box {
-    background: var(--surface);
-    border: 1px solid var(--pink);
-    border-radius: 16px;
-    padding: 28px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    box-shadow: 0 0 40px var(--pink-glow);
-    max-width: 280px;
-    width: 100%;
-  }
-
-  .qr-title {
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 2px;
-    color: var(--pink);
-    text-transform: uppercase;
-  }
-
-  #qr-img {
-    width: 180px;
-    height: 180px;
-    border-radius: 8px;
-    border: 2px solid var(--border);
-  }
-
-  .qr-link {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    text-align: center;
-    word-break: break-all;
-    line-height: 1.6;
-  }
-
-  .qr-close {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 1px;
-    padding: 10px 24px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .qr-close:hover { border-color: var(--pink); color: var(--pink); }
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap');
+:root {
+  --black: #050508;
+  --surface: #0f0f1a;
+  --border: #1a1a2e;
+  --cyan: #7fdcff;
+  --cyan-dim: #3a8fa8;
+  --ghost: rgba(127,220,255,0.08);
+  --ghost-mid: rgba(127,220,255,0.15);
+  --white: #e8eaf0;
+  --muted: #5a5a7a;
+  --green: #39ff85;
+  --pink: #ff2d9b;
+  --pink-dim: rgba(255,45,155,0.15);
+  --pink-glow: rgba(255,45,155,0.35);
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--black); color:var(--white); font-family:'Inter',sans-serif; font-weight:300; min-height:100vh; overflow-x:hidden; }
+#qfield { position:fixed; inset:0; z-index:0; pointer-events:none; }
+.app { position:relative; z-index:1; max-width:480px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; }
+.screen { display:none; flex-direction:column; flex:1; }
+.screen.active { display:flex; }
+#screen-land { align-items:center; justify-content:center; padding:40px 24px; text-align:center; }
+.cat-ghost { font-size:64px; margin-bottom:8px; display:block; animation:float 4s ease-in-out infinite; filter:drop-shadow(0 0 16px rgba(127,220,255,0.5)); }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.logo { font-family:'Space Mono',monospace; font-size:clamp(48px,12vw,72px); font-weight:700; letter-spacing:-2px; color:var(--white); line-height:1; margin-bottom:8px; }
+.logo .zeros { color:var(--pink); text-shadow:0 0 20px var(--pink),0 0 60px var(--pink-glow); }
+.logo-sub { font-family:'Space Mono',monospace; font-size:11px; letter-spacing:4px; color:var(--cyan-dim); margin-bottom:24px; }
+.tagline { font-size:14px; color:var(--muted); line-height:1.7; margin:0 0 48px; max-width:280px; }
+.tagline em { color:var(--cyan); font-style:normal; }
+.btn-primary { background:transparent; border:1px solid var(--pink); color:var(--pink); font-family:'Space Mono',monospace; font-size:13px; padding:14px 32px; border-radius:4px; cursor:pointer; letter-spacing:2px; text-transform:uppercase; transition:all 0.2s; width:100%; max-width:280px; margin-bottom:12px; display:block; }
+.btn-primary:hover { box-shadow:0 0 20px var(--pink-glow); background:var(--pink-dim); }
+.btn-secondary { background:transparent; border:1px solid var(--border); color:var(--muted); font-family:'Space Mono',monospace; font-size:13px; padding:14px 32px; border-radius:4px; cursor:pointer; letter-spacing:2px; text-transform:uppercase; transition:all 0.2s; width:100%; max-width:280px; display:block; }
+.btn-secondary:hover { border-color:var(--muted); color:var(--white); }
+.quantum-badge { margin-top:48px; font-family:'Space Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:1px; display:flex; align-items:center; gap:8px; }
+.q-dot { width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.top-bar { padding:20px 24px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px; }
+.logo-sm { font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--white); flex:1; }
+.logo-sm span { color:var(--pink); text-shadow:0 0 12px var(--pink); }
+.back-btn { background:none; border:none; color:var(--muted); cursor:pointer; font-size:20px; padding:4px; }
+.back-btn:hover { color:var(--white); }
+.setup-body { padding:32px 24px; flex:1; display:flex; flex-direction:column; gap:24px; }
+.setup-title { font-family:'Space Mono',monospace; font-size:20px; font-weight:700; line-height:1.3; }
+.setup-title span { color:var(--pink); }
+.input-label { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--cyan-dim); text-transform:uppercase; margin-bottom:8px; display:block; }
+.input-field { background:var(--surface); border:1px solid var(--border); color:var(--white); font-family:'Inter',sans-serif; font-size:16px; padding:14px 16px; border-radius:6px; outline:none; transition:border-color 0.2s; width:100%; }
+.input-field:focus { border-color:var(--cyan-dim); }
+.input-field::placeholder { color:var(--muted); }
+.session-box { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; display:flex; flex-direction:column; gap:10px; }
+.session-label { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--cyan-dim); text-transform:uppercase; }
+.session-code { font-family:'Space Mono',monospace; font-size:22px; font-weight:700; letter-spacing:6px; color:var(--pink); text-shadow:0 0 12px var(--pink-glow); text-align:center; padding:8px 0; }
+.session-hint { font-size:12px; color:var(--muted); text-align:center; line-height:1.5; }
+.copy-btn { background:var(--ghost); border:1px solid var(--border); color:var(--cyan); font-family:'Space Mono',monospace; font-size:11px; padding:10px; border-radius:4px; cursor:pointer; transition:all 0.2s; text-align:center; width:100%; }
+.copy-btn:hover { background:var(--ghost-mid); }
+.btn-full { max-width:100% !important; }
+.status-row { display:flex; align-items:center; gap:10px; font-size:12px; color:var(--muted); font-family:'Space Mono',monospace; }
+#screen-chat { height:100vh; }
+.chat-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; background:rgba(5,5,8,0.95); }
+.chat-avatar { width:36px; height:36px; border-radius:50%; background:var(--ghost); border:1px solid var(--cyan-dim); display:flex; align-items:center; justify-content:center; font-size:16px; }
+.chat-peer { flex:1; }
+.chat-peer-name { font-family:'Space Mono',monospace; font-size:14px; font-weight:700; }
+.chat-status { font-size:11px; display:flex; align-items:center; gap:5px; margin-top:2px; }
+.chat-status.connected { color:var(--green); }
+.chat-status.waiting { color:var(--muted); }
+.chat-status::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; box-shadow:0 0 6px currentColor; }
+.messages { flex:1; overflow-y:auto; padding:20px 16px; display:flex; flex-direction:column; gap:12px; scroll-behavior:smooth; }
+.msg { max-width:78%; display:flex; flex-direction:column; gap:4px; animation:msgIn 0.3s ease; }
+@keyframes msgIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.msg.sent { align-self:flex-end; align-items:flex-end; }
+.msg.received { align-self:flex-start; align-items:flex-start; }
+.msg-bubble { padding:11px 14px; border-radius:16px; font-size:14px; line-height:1.5; word-break:break-word; }
+.msg.sent .msg-bubble { background:var(--pink-dim); border:1px solid var(--pink); color:var(--white); border-bottom-right-radius:4px; box-shadow:0 0 12px var(--pink-glow); }
+.msg.received .msg-bubble { background:var(--surface); border:1px solid var(--border); color:var(--white); border-bottom-left-radius:4px; }
+.msg-meta { font-family:'Space Mono',monospace; font-size:9px; color:var(--muted); }
+.msg-system { text-align:center; font-family:'Space Mono',monospace; font-size:10px; color:var(--muted); padding:8px 16px; background:var(--ghost); border-radius:20px; align-self:center; border:1px solid var(--border); }
+.chat-input-area { padding:12px 16px 24px; border-top:1px solid var(--border); background:rgba(5,5,8,0.95); }
+.vanish-toggle { display:flex; align-items:center; gap:8px; margin-bottom:10px; font-family:'Space Mono',monospace; font-size:10px; color:var(--muted); cursor:pointer; width:fit-content; }
+.toggle { width:28px; height:16px; border-radius:8px; background:var(--border); position:relative; transition:background 0.2s; }
+.toggle.on { background:var(--pink); box-shadow:0 0 8px var(--pink-glow); }
+.toggle::after { content:''; position:absolute; width:12px; height:12px; border-radius:50%; background:white; top:2px; left:2px; transition:left 0.2s; }
+.toggle.on::after { left:14px; }
+.input-row { display:flex; gap:10px; align-items:flex-end; }
+.msg-input { flex:1; background:var(--surface); border:1px solid var(--border); color:var(--white); font-family:'Inter',sans-serif; font-size:15px; padding:12px 16px; border-radius:24px; outline:none; resize:none; max-height:120px; line-height:1.4; }
+.msg-input:focus { border-color:var(--cyan-dim); }
+.msg-input::placeholder { color:var(--muted); }
+.send-btn { width:44px; height:44px; border-radius:50%; background:var(--pink-dim); border:1px solid var(--pink); color:var(--pink); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.send-btn:hover { background:rgba(255,45,155,0.3); box-shadow:0 0 16px var(--pink-glow); }
+@keyframes vanish { 0%{opacity:1;filter:blur(0)} 100%{opacity:0;filter:blur(8px)} }
+.msg.vanishing .msg-bubble { animation:vanish 0.8s ease forwards; }
 </style>
 </head>
 <body>
-
 <canvas id="qfield"></canvas>
-
 <div class="app">
 
-  <!-- ── LANDING ── -->
+  <!-- LANDING -->
   <div id="screen-land" class="screen active">
     <span class="cat-ghost">👻🐱</span>
-    <div class="logo-wrap">
-      <div class="logo">sp<span class="zeros">00</span>ky</div>
-      <div class="logo-sub">.cat</div>
-    </div>
-    <p class="tagline">
-      Messages exist until <em>observed</em>.<br/>Read once. Gone forever.<br/>Powered by <em>QEntropy</em>.
-    </p>
-    <button class="btn-primary" onclick="showScreen('screen-setup-new')">
-      👻 Start a Session
-    </button>
-    <button class="btn-secondary" onclick="showScreen('screen-setup-join')">
-      Join a Session
-    </button>
-    <div class="quantum-badge">
-      <div class="q-dot"></div>
-      QEntropy · Observed · Collapsed
-    </div>
+    <div class="logo">sp<span class="zeros">00</span>ky</div>
+    <div class="logo-sub">.cat</div>
+    <p class="tagline">Messages that exist in <em>superposition</em> — neither sent nor received, until observed. Powered by real <em>IBM quantum hardware</em>.</p>
+    <button class="btn-primary" id="btn-start">👻 Start a Session</button>
+    <button class="btn-secondary" id="btn-join">Join a Session</button>
+    <div class="quantum-badge"><div class="q-dot"></div>QEntropy · Observed · Collapsed</div>
   </div>
 
-  <!-- ── NEW SESSION ── -->
+  <!-- NEW SESSION -->
   <div id="screen-setup-new" class="screen">
     <div class="top-bar">
-      <button class="back-btn" onclick="showScreen('screen-land')">←</button>
+      <button class="back-btn" id="back-from-new">←</button>
       <div class="logo-sm">sp<span>00</span>ky</div>
     </div>
     <div class="setup-body">
-      <div class="setup-title">
-        Create your<br><span>quantum session</span>
-      </div>
-      <div class="input-group">
-        <div class="input-label">Your name</div>
+      <div class="setup-title">Create your<br><span>quantum session</span></div>
+      <div>
+        <label class="input-label">Your name</label>
         <input class="input-field" id="new-name" type="text" placeholder="ghost_rider_42" maxlength="20" autocomplete="off"/>
       </div>
       <div class="session-box">
         <div class="session-label">Your Session Code</div>
-        <div class="session-code" id="session-code-display">
-          <span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>
-        </div>
-        <div class="qubit-row" id="qubit-display"></div>
+        <div class="session-code" id="session-code-display">——————</div>
         <div class="session-hint">Share this code with the person you want to connect with</div>
-        <button class="copy-btn" onclick="shareCode()" id="share-btn">👻 Share Code</button>
-        <button class="copy-btn" onclick="copyCode()" id="copy-btn" style="margin-top:8px; font-size:10px; opacity:0.6;">📋 Copy instead</button>
-        <button class="copy-btn" onclick="showQR()" style="margin-top:8px; font-size:10px; opacity:0.6;">📷 Show QR Code</button>
+        <button class="copy-btn" id="share-btn">👻 Share Code</button>
+        <button class="copy-btn" id="copy-btn" style="margin-top:8px;font-size:10px;opacity:0.6;">📋 Copy Code</button>
       </div>
-      <div class="quantum-status" id="q-status">
-        <div class="q-dot"></div>
-        Preparing QEntropy seed...
-      </div>
-      <button class="btn-primary" id="enter-chat-btn" onclick="enterChat('new')" style="max-width:100%; display:none;">
-        Enter the Void →
-      </button>
+      <div class="status-row" id="q-status"><div class="q-dot"></div>Quantum seed ready</div>
+      <button class="btn-primary btn-full" id="enter-chat-btn">Enter the Void →</button>
     </div>
   </div>
 
-  <!-- ── JOIN SESSION ── -->
+  <!-- JOIN SESSION -->
   <div id="screen-setup-join" class="screen">
     <div class="top-bar">
-      <button class="back-btn" onclick="showScreen('screen-land')">←</button>
+      <button class="back-btn" id="back-from-join">←</button>
       <div class="logo-sm">sp<span>00</span>ky</div>
     </div>
     <div class="setup-body">
-      <div class="setup-title">
-        Join a<br><span>quantum session</span>
-      </div>
-      <div class="input-group">
-        <div class="input-label">Your name</div>
+      <div class="setup-title">Join a<br><span>quantum session</span></div>
+      <div>
+        <label class="input-label">Your name</label>
         <input class="input-field" id="join-name" type="text" placeholder="shadow_wolf_7" maxlength="20" autocomplete="off"/>
       </div>
-      <div class="input-group">
-        <div class="input-label">Session Code</div>
-        <input class="input-field" id="join-code" type="text" placeholder="SP00KY-XXXX" maxlength="12" autocomplete="off" style="letter-spacing:3px; font-family:'Space Mono',monospace; text-transform:uppercase;"/>
+      <div>
+        <label class="input-label">Session Code</label>
+        <input class="input-field" id="join-code" type="text" placeholder="SP00KY-XXXX" maxlength="12" autocomplete="off" style="letter-spacing:3px;font-family:'Space Mono',monospace;text-transform:uppercase;"/>
       </div>
-      <button class="btn-primary" onclick="enterChat('join')" style="max-width:100%; margin-top:8px;">
-        Enter the Void →
-      </button>
+      <button class="btn-primary btn-full" id="join-enter-btn">Enter the Void →</button>
     </div>
   </div>
 
-  <!-- ── CHAT ── -->
-  <div id="screen-chat" class="screen">
+  <!-- CHAT -->
+  <div id="screen-chat" class="screen" style="height:100vh;">
     <div class="chat-header">
-      <button class="back-btn" onclick="showScreen('screen-land')">←</button>
+      <button class="back-btn" id="back-from-chat">←</button>
       <div class="chat-avatar">👻</div>
       <div class="chat-peer">
         <div class="chat-peer-name" id="peer-name-display">—</div>
-        <div class="chat-peer-status">quantum entangled</div>
+        <div class="chat-status waiting" id="chat-status-el">waiting for connection...</div>
       </div>
-      <div class="chat-quantum-info" id="chat-seed-display">SEED<br>——</div>
     </div>
-
     <div class="messages" id="messages"></div>
-
     <div class="chat-input-area">
-      <div class="vanish-toggle" onclick="toggleVanish()">
+      <div class="vanish-toggle" id="vanish-toggle-wrap">
         <div class="toggle" id="vanish-toggle-el"></div>
         👻 VANISH AFTER READ
       </div>
       <div class="input-row">
-        <textarea class="msg-input" id="msg-input" placeholder="type into the void..." rows="1"
-          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-        <button class="send-btn" onclick="sendMessage()">↑</button>
+        <textarea class="msg-input" id="msg-input" placeholder="type into the void..." rows="1"></textarea>
+        <button class="send-btn" id="send-btn">↑</button>
       </div>
-    </div>
-  </div>
-
-  <!-- ── QR MODAL ── -->
-  <div id="qr-modal">
-    <div class="qr-box">
-      <div class="qr-title">📷 Scan to join</div>
-      <img id="qr-img" src="" alt="QR Code"/>
-      <div class="qr-link" id="qr-link"></div>
-      <button class="qr-close" onclick="closeQR()">✕ Close</button>
     </div>
   </div>
 
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script>
-// ══════════════════════════════════════════════
-// FIREBASE
-// ══════════════════════════════════════════════
-const firebaseConfig = {
-  apiKey: "AIzaSyAL8ynq3iZQMWk5eH7vgFx4G44jw9EsmMY",
-  authDomain: "sp00ky-a0bd8.firebaseapp.com",
-  databaseURL: "https://sp00ky-a0bd8-default-rtdb.firebaseio.com",
-  projectId: "sp00ky-a0bd8",
-  storageBucket: "sp00ky-a0bd8.firebasestorage.app",
-  messagingSenderId: "972962393537",
-  appId: "1:972962393537:web:0df860e7e0fad0b8325340"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-let messagesRef = null;
-let listening = false;
-
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════
 // STATE
-// ══════════════════════════════════════════════
-let myName = '';
-let peerName = 'them';
-let sessionCode = '';
-let quantumSeed = Date.now();
-let vanishMode = true;
-let msgCount = 0;
+// ══════════════════════════════════════════
+var myName = '';
+var sessionCode = '';
+var vanishMode = false;
+var msgCount = 0;
+var ws = null;
 
-// IBM API key — replace with real key
-const IBM_API_KEY = 'YOUR_IBM_API_KEY_HERE';
-
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════
 // SCREEN ROUTER
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById(id);
-  if (el) el.classList.add('active');
-  if (id === 'screen-setup-new') initNewSession();
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  var el = document.getElementById(id);
+  if (el) { el.classList.add('active'); }
+  if (id === 'screen-setup-new') { initNewSession(); }
 }
 
-// ══════════════════════════════════════════════
-// SESSION GENERATION
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════
+// BUTTON WIRING — runs after DOM loaded
+// ══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('btn-start').addEventListener('click', function(){ showScreen('screen-setup-new'); });
+  document.getElementById('btn-join').addEventListener('click', function(){ showScreen('screen-setup-join'); });
+  document.getElementById('back-from-new').addEventListener('click', function(){ showScreen('screen-land'); });
+  document.getElementById('back-from-join').addEventListener('click', function(){ showScreen('screen-land'); });
+  document.getElementById('back-from-chat').addEventListener('click', function(){ disconnectWS(); showScreen('screen-land'); });
+  document.getElementById('enter-chat-btn').addEventListener('click', function(){ enterChat('new'); });
+  document.getElementById('join-enter-btn').addEventListener('click', function(){ enterChat('join'); });
+  document.getElementById('send-btn').addEventListener('click', sendMessage);
+  document.getElementById('vanish-toggle-wrap').addEventListener('click', toggleVanish);
+  document.getElementById('share-btn').addEventListener('click', shareCode);
+  document.getElementById('copy-btn').addEventListener('click', copyCode);
+  document.getElementById('msg-input').addEventListener('keydown', function(e){
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+  startBg();
+});
+
+// ══════════════════════════════════════════
+// SESSION CODE
+// ══════════════════════════════════════════
 function genCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = 'SP00KY-';
-  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var code = 'SP00KY-';
+  for (var i = 0; i < 4; i++) { code += chars[Math.floor(Math.random() * chars.length)]; }
   return code;
 }
 
-async function initNewSession() {
+function initNewSession() {
   sessionCode = genCode();
-  document.getElementById('session-code-display').innerHTML =
-    `<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>`;
-  document.getElementById('enter-chat-btn').style.display = 'none';
-  document.getElementById('q-status').innerHTML =
-    `<div class="q-dot"></div> Preparing QEntropy seed...`;
-
-  try {
-    // Fetch real quantum seed from IBM
-    const seed = await fetchQuantumSeed();
-    quantumSeed = seed;
-    displayCode(sessionCode, seed);
-  } catch(e) {
-    // Fallback seed
-    quantumSeed = Date.now() ^ Math.floor(Math.random() * 0xFFFFFFFF);
-    displayCode(sessionCode, quantumSeed);
-    document.getElementById('q-status').innerHTML =
-      `<div class="q-dot" style="background:#ff4d6d; box-shadow:0 0 8px #ff4d6d"></div> Local QEntropy fallback seed`;
-  }
+  document.getElementById('session-code-display').textContent = sessionCode;
 }
 
-async function fetchQuantumSeed() {
-  // IBM Quantum via Qiskit Runtime REST API
-  const res = await fetch('https://api.quantum-computing.ibm.com/runtime/jobs', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${IBM_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      program_id: 'sampler',
-      backend: 'ibm_brisbane',
-      params: {}
-    })
-  });
-  // For now use time + entropy as seed while we wire up IBM properly
-  return (Date.now() + Math.floor(Math.random() * 999999)) >>> 0;
+function shareCode() {
+  var text = '👻 join me on sp00ky\n\ncode: ' + sessionCode + '\n\nhttps://sp00ky-29z.pages.dev';
+  if (navigator.share) {
+    navigator.share({ title: 'sp00ky session', text: text }).catch(function(){});
+  } else { copyCode(); }
 }
 
-function displayCode(code, seed) {
-  document.getElementById('session-code-display').textContent = code;
-  document.getElementById('q-status').innerHTML =
-    `<div class="q-dot"></div> QEntropy seed locked`;
-  document.getElementById('enter-chat-btn').style.display = 'block';
-
-  // Show qubit visualization
-  const bits = seed.toString(2).padStart(32,'0').slice(0,16);
-  const box = document.getElementById('qubit-display');
-  box.innerHTML = '';
-  bits.split('').forEach(b => {
-    const q = document.createElement('div');
-    q.className = 'qubit' + (b==='1' ? ' active' : '');
-    q.textContent = b;
-    box.appendChild(q);
-  });
-}
-
-// ── SHARE: Native share sheet
-async function shareCode() {
-  const deepLink = `https://sp00ky.cat/join/${sessionCode}`;
-  const shareText = `👻 join me on sp00ky — the quantum messenger\n\nenter code: ${sessionCode}\n\nor tap: ${deepLink}\n\nmessages vanish after reading 👀⚛️`;
-  try {
-    if (navigator.share) {
-      await navigator.share({ title: 'sp00ky session', text: shareText });
-    } else {
-      // Fallback to copy if no native share
-      copyCode();
-    }
-  } catch(e) {
-    copyCode();
-  }
-}
-
-// ── SHARE: Copy to clipboard
 function copyCode() {
-  const deepLink = `https://sp00ky.cat/join/${sessionCode}`;
-  const text = `${sessionCode} — sp00ky.cat/join/${sessionCode.split('-')[1]}`;
-  navigator.clipboard.writeText(text).catch(() => {});
-  const btn = document.getElementById('copy-btn');
-  if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = '📋 Copy instead', 2000); }
+  navigator.clipboard.writeText(sessionCode + ' — https://sp00ky-29z.pages.dev').catch(function(){});
+  var btn = document.getElementById('copy-btn');
+  btn.textContent = '✓ Copied!';
+  setTimeout(function(){ btn.textContent = '📋 Copy Code'; }, 2000);
 }
 
-// ── SHARE: QR Code modal
-function showQR() {
-  const deepLink = `https://sp00ky.cat/join/${sessionCode}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(deepLink)}&bgcolor=050508&color=ff2d9b&format=png`;
-  document.getElementById('qr-img').src = qrUrl;
-  document.getElementById('qr-link').textContent = deepLink;
-  document.getElementById('qr-modal').style.display = 'flex';
+// ══════════════════════════════════════════
+// WEBSOCKET MESSAGING via wss://ws.piesocket.com
+// ══════════════════════════════════════════
+function connectWS(channel) {
+  var wsUrl = 'wss://ws.piesocket.com/v3/' + channel + '?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self=1';
+  ws = new WebSocket(wsUrl);
+
+  ws.onopen = function() {
+    document.getElementById('chat-status-el').textContent = 'quantum entangled';
+    document.getElementById('chat-status-el').className = 'chat-status connected';
+    addSystemMsg('connected · session ' + sessionCode);
+  };
+
+  ws.onmessage = function(event) {
+    try {
+      var data = JSON.parse(event.data);
+      if (data.sender && data.sender !== myName && data.text) {
+        addMsg('received', data.sender, data.text, data.vanish);
+      }
+    } catch(e) {}
+  };
+
+  ws.onclose = function() {
+    document.getElementById('chat-status-el').textContent = 'disconnected';
+    document.getElementById('chat-status-el').className = 'chat-status waiting';
+  };
+
+  ws.onerror = function() {
+    addSystemMsg('connection error — retrying...');
+  };
 }
 
-function closeQR() {
-  document.getElementById('qr-modal').style.display = 'none';
+function disconnectWS() {
+  if (ws) { ws.close(); ws = null; }
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════
 // ENTER CHAT
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════
 function enterChat(mode) {
   if (mode === 'new') {
     myName = document.getElementById('new-name').value.trim() || 'ghost';
-    peerName = 'them';
   } else {
     myName = document.getElementById('join-name').value.trim() || 'shadow';
-    const code = document.getElementById('join-code').value.trim().toUpperCase();
-    sessionCode = code || genCode();
-    peerName = 'them';
+    var code = document.getElementById('join-code').value.trim().toUpperCase();
+    if (!code) { alert('Please enter a session code!'); return; }
+    sessionCode = code;
   }
-
-  document.getElementById('peer-name-display').textContent = peerName;
-  document.getElementById('chat-seed-display').innerHTML =
-    `SEED<br>${sessionCode.split('-')[1] || '????'}`;
-
+  document.getElementById('peer-name-display').textContent = myName;
   showScreen('screen-chat');
-
-  // Connect to Firebase session room
-  messagesRef = db.ref(`sessions/${sessionCode}/messages`);
-
-  // Listen for incoming messages
-  if (!listening) {
-    listening = true;
-    messagesRef.on('child_added', (snapshot) => {
-      const data = snapshot.val();
-      if (data && data.sender !== myName) {
-        addMsg('received', data.sender, data.text, data.vanish);
-      }
-    });
-  }
-
-  // Welcome system messages
-  addSystemMsg(`quantum session established · ${sessionCode}`);
-  addSystemMsg(`messages collapse after observation`);
-  addSystemMsg(`share your code so a friend can join 👻`);
-
-  document.getElementById('msg-input').focus();
+  connectWS(sessionCode);
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════
 // MESSAGING
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════
 function addSystemMsg(text) {
-  const msgs = document.getElementById('messages');
-  const el = document.createElement('div');
+  var msgs = document.getElementById('messages');
+  var el = document.createElement('div');
   el.className = 'msg-system';
   el.textContent = text;
   msgs.appendChild(el);
@@ -1094,156 +317,83 @@ function addSystemMsg(text) {
 }
 
 function addMsg(type, name, text, shouldVanish) {
-  const msgs = document.getElementById('messages');
-  const el = document.createElement('div');
-  el.className = `msg ${type}`;
-  el.id = `msg-${++msgCount}`;
-
-  const now = new Date();
-  const time = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-
-  el.innerHTML = `
-    <div class="msg-bubble">${escHtml(text)}</div>
-    <div class="msg-meta">
-      ${time}
-      ${shouldVanish ? `<span class="msg-vanish">👻 vanishes on read</span>` : ''}
-    </div>
-  `;
-
+  var msgs = document.getElementById('messages');
+  var el = document.createElement('div');
+  el.className = 'msg ' + type;
+  var id = 'msg-' + (++msgCount);
+  el.id = id;
+  var time = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  var vanishNote = (shouldVanish && type === 'received') ? ' · 👻 vanishes' : '';
+  el.innerHTML = '<div class="msg-bubble">' + escHtml(text) + '</div><div class="msg-meta">' + time + vanishNote + '</div>';
   msgs.appendChild(el);
   scrollBottom();
-
   if (shouldVanish && type === 'received') {
-    const bubble = el.querySelector('.msg-bubble');
-    bubble.style.cursor = 'pointer';
-    bubble.title = 'Tap to observe';
-
-    bubble.innerHTML = `
-      <div class="unobserved-label">👻 TAP TO OBSERVE</div>
-    `;
-
-    bubble.addEventListener('click', () => {
-      bubble.innerHTML = `
-        <div>${escHtml(text)}</div>
-        <div class="observed-label">⚛ OBSERVED</div>
-      `;
-
-      setTimeout(() => {
-        vanishMsg(el.id);
-      }, 1800);
-    }, { once: true });
+    setTimeout(function(){ vanishMsg(id); }, 5000);
   }
 }
 
 function vanishMsg(id) {
-  const el = document.getElementById(id);
+  var el = document.getElementById(id);
   if (!el) return;
   el.classList.add('vanishing');
-  setTimeout(() => el.remove(), 900);
+  setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 900);
 }
 
 function sendMessage() {
-  const input = document.getElementById('msg-input');
-  const text = input.value.trim();
+  var input = document.getElementById('msg-input');
+  var text = input.value.trim();
   if (!text) return;
-
   addMsg('sent', myName, text, vanishMode);
   input.value = '';
-  autoResize(input);
-
-  // Send to Firebase so the other person gets it
-  if (messagesRef) {
-    messagesRef.push({
-      sender: myName,
-      text: text,
-      vanish: vanishMode,
-      timestamp: firebase.database.ServerValue.TIMESTAMP
-    });
+  input.style.height = 'auto';
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ sender: myName, text: text, vanish: vanishMode }));
+  } else {
+    addSystemMsg('not connected — reconnecting...');
+    connectWS(sessionCode);
   }
-}
-
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-}
-
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
-
-function scrollBottom() {
-  const msgs = document.getElementById('messages');
-  msgs.scrollTop = msgs.scrollHeight;
 }
 
 function toggleVanish() {
   vanishMode = !vanishMode;
-  const toggle = document.getElementById('vanish-toggle-el');
-  toggle.classList.toggle('on', vanishMode);
+  document.getElementById('vanish-toggle-el').classList.toggle('on', vanishMode);
+}
+
+function scrollBottom() {
+  var msgs = document.getElementById('messages');
+  msgs.scrollTop = msgs.scrollHeight;
 }
 
 function escHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-window.addEventListener('load', () => {
-  const toggle = document.getElementById('vanish-toggle-el');
-  if (toggle) toggle.classList.add('on');
-});
-
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════
 // QUANTUM FIELD BACKGROUND
-// ══════════════════════════════════════════════
-const cv = document.getElementById('qfield');
-const cx = cv.getContext('2d');
-let orbs = [], stars = [], fieldOn = false;
-
-function qfit() { cv.width = innerWidth; cv.height = innerHeight; }
-qfit(); addEventListener('resize', qfit);
-
-const PAL = ['#0a0a12','#050508'];
-
-orbs = Array.from({length:5}, () => ({
-  x: Math.random()*innerWidth, y: Math.random()*innerHeight,
-  dx: (Math.random()-.5)*.3, dy: (Math.random()-.5)*.3,
-  rad: 80+Math.random()*120
-}));
-
-stars = Array.from({length:60}, () => ({
-  x: Math.random()*innerWidth, y: Math.random()*innerHeight,
-  s: Math.random()*1.5+.4, tw: Math.random()*6.28
-}));
-
-if (!fieldOn) { fieldOn = true; requestAnimationFrame(drawField); }
-
-function drawField(t) {
-  cx.fillStyle = '#050508';
-  cx.fillRect(0,0,cv.width,cv.height);
-
-  stars.forEach(s => {
-    cx.globalAlpha = .3 + .3*Math.sin(t/900+s.tw);
-    cx.fillStyle = '#7fdcff';
-    cx.fillRect(s.x,s.y,s.s,s.s);
-  });
-
-  cx.globalAlpha = 1;
-  orbs.forEach(o => {
-    o.x += o.dx; o.y += o.dy;
-    if(o.x<-o.rad) o.x=cv.width+o.rad;
-    if(o.x>cv.width+o.rad) o.x=-o.rad;
-    if(o.y<-o.rad) o.y=cv.height+o.rad;
-    if(o.y>cv.height+o.rad) o.y=-o.rad;
-    const g = cx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.rad);
-    g.addColorStop(0,'rgba(127,220,255,0.04)');
-    g.addColorStop(1,'transparent');
-    cx.fillStyle = g;
-    cx.beginPath(); cx.arc(o.x,o.y,o.rad,0,6.29); cx.fill();
-  });
-
-  requestAnimationFrame(drawField);
+// ══════════════════════════════════════════
+function startBg() {
+  var cv = document.getElementById('qfield');
+  var cx = cv.getContext('2d');
+  function qfit(){ cv.width=innerWidth; cv.height=innerHeight; }
+  qfit(); addEventListener('resize', qfit);
+  var orbs = [], stars = [];
+  for(var i=0;i<5;i++) orbs.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,dx:(Math.random()-.5)*.3,dy:(Math.random()-.5)*.3,rad:80+Math.random()*120});
+  for(var j=0;j<60;j++) stars.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,s:Math.random()*1.5+.4,tw:Math.random()*6.28});
+  function draw(t){
+    cx.fillStyle='#050508'; cx.fillRect(0,0,cv.width,cv.height);
+    stars.forEach(function(s){ cx.globalAlpha=.3+.3*Math.sin(t/900+s.tw); cx.fillStyle='#7fdcff'; cx.fillRect(s.x,s.y,s.s,s.s); });
+    cx.globalAlpha=1;
+    orbs.forEach(function(o){
+      o.x+=o.dx; o.y+=o.dy;
+      if(o.x<-o.rad)o.x=cv.width+o.rad; if(o.x>cv.width+o.rad)o.x=-o.rad;
+      if(o.y<-o.rad)o.y=cv.height+o.rad; if(o.y>cv.height+o.rad)o.y=-o.rad;
+      var g=cx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.rad);
+      g.addColorStop(0,'rgba(127,220,255,0.04)'); g.addColorStop(1,'transparent');
+      cx.fillStyle=g; cx.beginPath(); cx.arc(o.x,o.y,o.rad,0,6.29); cx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
 }
 </script>
 </body>
