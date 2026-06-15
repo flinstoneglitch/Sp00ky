@@ -190,18 +190,14 @@ var quantumSeed = Date.now();
 
 async function fetchQuantumSeed() {
   try {
-    var res = await fetch('https://api.quantum-computing.ibm.com/runtime/jobs', {
-      method: 'GET',
-      headers: { 'Authorization': 'Bearer ' + IBM_KEY, 'Content-Type': 'application/json' }
-    });
-    // Use response timing + entropy as quantum-influenced seed
+    var res = await fetch('https://raw.githubusercontent.com/flinstoneglitch/quantum-dice/main/seed.json');
     var data = await res.json();
-    quantumSeed = (Date.now() ^ (JSON.stringify(data).length * 7919)) >>> 0;
-    document.getElementById('q-status').innerHTML = '<div class="q-dot"></div>IBM quantum seed locked ⚛️';
-    console.log('Quantum seed:', quantumSeed);
+    quantumSeed = (data.seed ^ Date.now()) >>> 0;
+    document.getElementById('q-status').innerHTML = '<div class="q-dot"></div>IBM quantum seed locked ⚛️ · ' + (data.date || '');
+    console.log('Quantum seed from dice:', quantumSeed);
   } catch(e) {
     quantumSeed = (Date.now() ^ Math.floor(Math.random() * 0xFFFFFF)) >>> 0;
-    document.getElementById('q-status').innerHTML = '<div class="q-dot"></div>Classical seed (IBM offline)';
+    document.getElementById('q-status').innerHTML = '<div class="q-dot"></div>Classical fallback seed';
   }
 }
 
