@@ -277,6 +277,38 @@ function copyCode() {
 // ══════════════════════════════════════════
 // WEBSOCKET MESSAGING via wss://ws.piesocket.com
 // ══════════════════════════════════════════
+// ══════════════════════════════════════════
+// QUANTUM ENCRYPTION
+// ══════════════════════════════════════════
+function generateKey(seed, length) {
+  var key = [];
+  var s = seed >>> 0;
+  for (var i = 0; i < length; i++) {
+    s ^= s << 13; s ^= s >> 17; s ^= s << 5;
+    key.push(s >>> 0 & 0xFF);
+  }
+  return key;
+}
+
+function xorEncrypt(text, seed) {
+  var bytes = [];
+  for (var i = 0; i < text.length; i++) {
+    bytes.push(text.charCodeAt(i));
+  }
+  var key = generateKey(seed, bytes.length);
+  var encrypted = bytes.map(function(b, i){ return b ^ key[i]; });
+  return btoa(String.fromCharCode.apply(null, encrypted));
+}
+
+function xorDecrypt(encoded, seed) {
+  try {
+    var bytes = atob(encoded).split('').map(function(c){ return c.charCodeAt(0); });
+    var key = generateKey(seed, bytes.length);
+    var decrypted = bytes.map(function(b, i){ return b ^ key[i]; });
+    return decrypted.map(function(c){ return String.fromCharCode(c); }).join('');
+  } catch(e) { return '[decryption failed]'; }
+}
+
 function connectWS(channel) {
   var wsUrl = 'wss://ws.piesocket.com/v3/' + channel + '?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self=1';
   ws = new WebSocket(wsUrl);
@@ -285,13 +317,15 @@ function connectWS(channel) {
     document.getElementById('chat-status-el').textContent = 'quantum entangled';
     document.getElementById('chat-status-el').className = 'chat-status connected';
     addSystemMsg('connected · session ' + sessionCode);
+    addSystemMsg('🔐 quantum encryption active');
   };
 
   ws.onmessage = function(event) {
     try {
       var data = JSON.parse(event.data);
-      if (data.sender && data.sender !== myName && data.text) {
-        addMsg('received', data.sender, data.text, data.vanish);
+      if (data.sender && data.sender !== myName && data.encrypted) {
+        var decrypted = xorDecrypt(data.encrypted, quantumSeed);
+        addMsg('received', data.sender, decrypted, data.vanish);
       }
     } catch(e) {}
   };
@@ -370,8 +404,8 @@ function sendMessage() {
   input.value = '';
   input.style.height = 'auto';
   if (ws && ws.readyState === WebSocket.OPEN) {
-    var qVal = qrng(quantumSeed + msgCount * 6364136223846793);
-    ws.send(JSON.stringify({ sender: myName, text: text, vanish: vanishMode, qseed: qVal.toFixed(8) }));
+    var encrypted = xorEncrypt(text, quantumSeed + msgCount);
+    ws.send(JSON.stringify({ sender: myName, encrypted: encrypted, vanish: vanishMode }));
   } else {
     addSystemMsg('not connected — reconnecting...');
     connectWS(sessionCode);
